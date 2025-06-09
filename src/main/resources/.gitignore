@@ -1,0 +1,21 @@
+# Java
+*.class
+*.jar
+
+# Gradle
+/build
+.gradle/
+
+# STS
+/.settings
+/.classpath
+/.project
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>홈 - MySite</title>
+</head>
+<body>
+<h1>Welcome to MySite</h1>
+<p>현재 시간: <span th:text="${#dates.format(now, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+<div th:replace="~{fragments/nav :: navigation}"></div>
+<p><a th:href="@{/board/list}">게시판 바로가기</a></p>
+</body>
+</html>

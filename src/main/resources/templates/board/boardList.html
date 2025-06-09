@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판 목록</title>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navigation}"></div>
+<h2>게시판</h2>
+<a th:href="@{/board/write}">글쓰기</a>
+<table border="1">
+    <tr><th>번호</th><th>제목</th><th>작성자</th><th>작성일</th></tr>
+    <tr th:each="b : ${boardList}">
+        <td th:text="${b.id}"></td>
+        <td><a th:href="@{/board/view(id=${b.id})}" th:text="${b.title}"></a></td>
+        <td th:text="${b.writer}"></td>
+        <td th:text="${b.createdAt}"></td>
+    </tr>
+</table>
+<div style="margin-top:10px">
+    <a th:if="${currentPage > 1}" th:href="@{/board/list(page=1)}">[처음]</a>
+    <a th:if="${hasPrev}" th:href="@{/board/list(page=${startPage - 1})}">[이전]</a>
+    <span th:each="i : ${#numbers.sequence(startPage, endPage)}">
+        <span th:if="${i == currentPage}"><b th:text="'[' + ${i} + ']'"></b></span>
+        <a th:if="${i != currentPage}" th:href="@{/board/list(page=${i})}" th:text="'[' + ${i} + ']'"></a>
+    </span>
+    <a th:if="${hasNext}" th:href="@{/board/list(page=${endPage + 1})}">[다음]</a>
+    <a th:if="${currentPage < totalPages}" th:href="@{/board/list(page=${totalPages})}">[마지막]</a>
+</div>
+</body>
+</html>

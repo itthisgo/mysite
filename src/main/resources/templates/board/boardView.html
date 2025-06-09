@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>글 보기</title>
+</head>
+<body>
+<div th:replace="fragments/nav :: navigation"></div>
+<h2 th:text="${board.title}"></h2>
+<p>게시글 번호: <span th:text="${board.id}"></span></p>
+<p>작성자: <span th:text="${board.writer}"></span></p>
+<p>작성일: <span th:text="${board.createdAt}"></span></p>
+<p th:text="${board.content}"></p>
+<div th:if="${board.files != null}">
+    <div th:each="file : ${board.files}">
+        <p>
+            첨부파일:
+            <a th:href="@{'/board/upload/' + ${file.savedFilename}}"
+               th:attr="download=${file.originalFilename}" th:text="${file.originalFilename} + ' (' + file.fileSize + ' bytes)'"></a>
+        </p>
+    </div>
+</div>
+<div th:unless="${board.files != null}">
+    <p>첨부파일: </p>
+</div>
+<hr/>
+<a th:href="@{/board/edit(id=${board.id})}">수정</a>
+<a th:href="@{/board/delete(id=${board.id})}" onclick="return confirm('정말 삭제하시겠습니까?');">삭제</a>
+<a th:href="@{/board/list}">목록</a>
+</body>
+</html>

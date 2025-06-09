@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="navigation">
+    <h2><a th:href="@{/}">Home</a></h2>
+    <div th:if="${session.loginUser != null}">
+        <p>환영합니다, <b th:text="${session.loginUser.username}"></b>님!
+            <a th:href="@{/user/logout}">로그아웃</a></p>
+    </div>
+    <div th:unless="${session.loginUser != null}">
+        <p><a th:href="@{/user/login}">로그인</a> |
+            <a th:href="@{/user/register}">회원가입</a></p>
+    </div>
+    <hr/>
+</div>
+</body>
+</html>
