@@ -19,7 +19,7 @@ jobs:
         java-version: '17'  # 버전에 맞게 변경
 
     - name: Build JAR
-      run: ./gradlew clean build -x test
+      run: ./gradlew clean bootJar -x test
 
     - name: Package deployment zip
       run: |
