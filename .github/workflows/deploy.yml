@@ -45,6 +45,7 @@ jobs:
           --deployment-group-name $CODEDEPLOY_GROUP_NAME \
           --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=deploy-package.zip \
           --deployment-config-name CodeDeployDefault.AllAtOnce \
+          --deployment-config-name CodeDeployDefault.OneAtATime \  # 무중단 배포 설정
           --region $AWS_REGION
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
