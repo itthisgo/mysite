@@ -14,7 +14,7 @@ variable "aws_region" {
 
 variable "source_ami" {
   type    = string
-  default = "ami-0662f4965dfc70aca"  # Ubuntu 22.04 기준 (서울 리전)
+  default = "ami-0662f4965dfc70aca"  # Ubuntu 24.04 기준 (서울 리전)
 }
 
 variable "instance_type" {
