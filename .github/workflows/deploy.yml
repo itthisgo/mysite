@@ -1,55 +1,61 @@
-name: CI/CD for Spring Boot to EC2 via CodeDeploy
+name: AMI 기반 롤링 업데이트
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '17'  # 버전에 맞게 변경
-
-    - name: Build JAR
-      run: ./gradlew clean bootJar -x test
-
-    - name: Package deployment zip
-      run: |
-        mkdir -p deploy
-        cp appspec.yml deploy/
-        cp $(find build/libs -name "*.jar" | head -n 1) deploy/mysite.jar
-        cp -r scripts deploy/
-        cd deploy && zip -r ../mysite-deploy.zip . && cd ..
+    - name: Build
+      run: ./gradlew build
 
     - name: Upload to S3
-      run: |
-        aws s3 cp mysite-deploy.zip s3://$S3_BUCKET_NAME/deploy-package.zip
+      run: aws s3 cp build/libs/mysite.jar s3://mysite-springbootapp-deploy-bucket/mysite.jar
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-        S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+        AWS_DEFAULT_REGION: ap-northeast-2
 
-    - name: Trigger CodeDeploy
-      run: |
-        aws deploy create-deployment \
-          --application-name $CODEDEPLOY_APP_NAME \
-          --deployment-group-name $CODEDEPLOY_GROUP_NAME \
-          --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=deploy-package.zip \
-          --deployment-config-name CodeDeployDefault.OneAtATime \
-          --region $AWS_REGION
+    - name: Build AMI with Packer
+      run: packer build ami.pkr.hcl
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-        CODEDEPLOY_APP_NAME: ${{ secrets.CODEDEPLOY_APP_NAME }}
-        CODEDEPLOY_GROUP_NAME: ${{ secrets.CODEDEPLOY_GROUP_NAME }}
-        S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+        AWS_DEFAULT_REGION: ap-northeast-2
+
+    - name: Get latest AMI
+      id: ami
+      run: |
+        AMI_ID=$(aws ec2 describe-images --owners self --filters "Name=name,Values=mysite-app-*" --query "Images | sort_by(@, &CreationDate)[-1].ImageId" --output text)
+        echo "AMI_ID=$AMI_ID" >> $GITHUB_ENV
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ap-northeast-2
+
+    - name: Update Launch Template Version
+      run: |
+        aws ec2 create-launch-template-version \
+          --launch-template-id lt-047d936eedc81dfc8 \
+          --source-version 1 \
+          --launch-template-data "{\"ImageId\":\"${{ env.AMI_ID }}\"}"
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ap-northeast-2
+
+    - name: Start ASG Rolling Update
+      run: |
+        aws autoscaling start-instance-refresh \
+          --auto-scaling-group-name my-asg \
+          --strategy Rolling
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ap-northeast-2
