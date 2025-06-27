@@ -52,6 +52,7 @@ build {
       "unzip /tmp/awscliv2.zip -d /tmp",
       "sudo /tmp/aws/install",
       "sudo mkdir -p /home/ubuntu/myapp",
+      "sudo chown -R ubuntu:ubuntu /home/ubuntu/myapp",
       "cd /home/ubuntu/myapp",
       "aws s3 cp s3://${var.s3_bucket}/mysite.jar /home/ubuntu/myapp/mysite.jar",
       "sudo chown -R ubuntu:ubuntu /home/ubuntu/myapp",
