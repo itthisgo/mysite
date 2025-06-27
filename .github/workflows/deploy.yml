@@ -28,7 +28,9 @@ jobs:
         S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
 
     - name: Build New AMI with Packer
-      run: packer build ami.pkr.hcl
+      run: |
+        packer init ami.pkr.hcl
+        packer build -var "s3_bucket=${{ secrets.S3_BUCKET_NAME }}" ami.pkr.hcl
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
