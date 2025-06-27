@@ -46,6 +46,9 @@ build {
     inline = [
       "sudo apt update",
       "sudo apt install -y openjdk-17-jdk",
+      "curl 'https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip' -o '/tmp/awscliv2.zip'",
+      "unzip /tmp/awscliv2.zip -d /tmp",
+      "sudo /tmp/aws/install",
       "sudo mkdir -p /home/ubuntu/myapp",
       "cd /home/ubuntu/myapp",
       "aws s3 cp s3://${var.s3_bucket}/mysite.jar /home/ubuntu/myapp/mysite.jar",
