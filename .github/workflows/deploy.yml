@@ -14,10 +14,13 @@ jobs:
 
     - name: Build Spring Boot JAR
       run: ./gradlew clean bootJar -x test
+    
+    - name: 확인
+      run: ls -al build/libs
 
     - name: Upload Artifact to S3
       run: |
-        aws s3 cp build/libs/mysite.jar s3://mysite-springbootapp-deploy-bucket/mysite.jar
+        aws s3 cp build/libs/mysite-0.0.1-SNAPSHOT.jar s3://mysite-springbootapp-deploy-bucket/mysite.jar
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
